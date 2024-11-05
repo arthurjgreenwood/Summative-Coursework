@@ -20,11 +20,26 @@ public class Tickets implements Comparable<Tickets> {
     public static void setD3(double discount3) {
         D3 = discount3;
     }
+    public static double getD1() {
+        return D1;
+    }
+    public static double getD2() {
+        return D2;
+    }
+    public static double getD3() {
+        return D3;
+    }
+    public String getLineName(){
+        return this.lineName;
+    }
+    public double getTicketPrice(){
+        return this.ticketPrice;
+    }
     
     
     @Override
     public int compareTo(Tickets tickets) {
-        return 0;
+            return this.lineName.compareTo(tickets.lineName);
     }
     
     public String toString() {

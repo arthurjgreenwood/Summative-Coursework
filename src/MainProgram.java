@@ -2,6 +2,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+//TODO something wacky is going on with the price calculations, fix this later
+
 public class MainProgram {
     
     public static SortedLinkedList<Customer> validCustomers = new SortedLinkedList<>();
@@ -13,10 +15,14 @@ public class MainProgram {
     }
     
     public static void readIn(){
-        
+        Scanner sc;
         try {
-            Scanner sc = new Scanner(new File("src/input_data"));
-            
+            sc = new Scanner(new File("src/input_data"));
+        }
+        catch (FileNotFoundException e) {
+            System.out.println("File not found");
+            return;
+        }
             int Names = sc.nextInt();
             sc.nextLine();
             int i = 0;
@@ -45,10 +51,7 @@ public class MainProgram {
             Tickets.setD2(sc.nextDouble());
             Tickets.setD3(sc.nextDouble());
             sc.close();
-        }
-        catch (FileNotFoundException e) {
-            System.out.println("File not found");
-        }
+        
     }
     
     public static void menu(){
@@ -68,56 +71,19 @@ public class MainProgram {
                     availableTickets();
                     break;
                 case "c":
-                    System.out.println(validCustomers); //TODO write a method to print customer info
+                    for(Customer c: validCustomers) {
+                        System.out.println(c);
+                        if (!c.getTicketsHeld().isEmpty()) {
+                            System.out.println(c.ticketTotal());
+                        }
+                    }
                     break;
                 case "a":
                     addTickets();
                     break;
                     
                 case "r":
-                    System.out.print("Customer First Name: ");
-                    String fName = sc.next();
-                    System.out.print("Customer Last Name: ");
-                    String lName = sc.next();
-                    Customer customer = null;
-                    for (Customer c : validCustomers) {
-                        if (c.compareTo(new Customer(fName, lName)) == 0) {
-                            customer = c;
-                            break;
-                        }
-                    }
-                    if (!validCustomers.contains(customer)) {
-                        System.out.println("Customer not found");
-                        return;
-                    }
-                    assert customer != null;
-                    
-                    if (customer.getTicketsHeld().isEmpty()) {
-                        System.out.println(fName + lName + " has no tickets to remove");
-                        return;
-                    }
-                    //TODO print specific customers holdings with numbers
-                    try {
-                        System.out.print("Select a ticket type to remove: ");
-                        Pair<Tickets, Integer> ticketType = customer.getTicketsHeld().get(sc.nextInt()-1);
-                        int quantity = sc.nextInt();
-                        if (quantity > ticketType.getSecond()){
-                            System.out.println(fName + lName + " does not have this many tickets");
-                            return;
-                        }
-                        if (quantity == ticketType.getSecond()) {
-                            customer.removeTickets(ticketType);
-                        }
-                        else {
-                            int total = ticketType.getSecond() - quantity;
-                            customer.
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Invalid ticket type");
-                    }
-                    System.out.print("Quantity: ");
-                    
-                    
+                    removeTickets();
                     break;
                 case "f":
                     return;
@@ -134,7 +100,7 @@ public class MainProgram {
         }
     }
     
-    public static void addTickets(){ //TODO: implement ability to add tickets to a type that already exist in the profile
+    public static void addTickets(){
         Scanner sc = new Scanner(System.in);
         System.out.print("Customer First Name: ");
         String fName = sc.next();
@@ -147,17 +113,6 @@ public class MainProgram {
         }
         availableTickets();
         
-        System.out.println();
-        System.out.print("Select a ticket type: ");
-        Tickets selection = null;
-        try {
-            selection = availableTickets.get(sc.nextInt() - 1);
-        } catch (Exception e) {
-            System.out.println("Invalid ticket type");
-        }
-        
-        System.out.print("Quantity: ");
-        int quantity = sc.nextInt();
         Customer customer = null;
         for (Customer c : validCustomers) {
             if (c.compareTo(new Customer(fName, lName)) == 0) {
@@ -165,7 +120,108 @@ public class MainProgram {
                 break;
             }
         }
-        assert customer != null; //Customer cannot equal null after the for loop, as validity is checked previously in this method
-        customer.addTickets(selection, quantity);
+        System.out.println("\n" + customer);
+        
+        System.out.println();
+        System.out.print("Select a ticket type: ");
+        Tickets selection;
+        try {
+            selection = availableTickets.get(sc.nextInt() - 1);
+        } catch (Exception e) {
+            System.out.println("Invalid ticket type");
+            return;
+        }
+        
+        try {
+            if (customer.getTicketsHeld().size() == 3 && !(customer.getTicketsHeld().contains(customer.getTicketHeld(selection)))){
+                System.out.println("Customers cannot hold more than 3 kinds of ticket.");
+                return;
+            }
+        } catch (NullPointerException e) {
+            System.out.println("There was an error acquiring customer data.");
+        }
+        
+        System.out.print("Quantity: ");
+        int quantity = sc.nextInt();
+        
+        try {
+            if (quantity <= 0)
+                System.out.println("Cannot add negative tickets.");
+            else if (customer.getTicketsHeld().contains(customer.getTicketHeld(selection))) {
+                    customer.alterTicketCount(customer.getTicketHeld(selection), quantity);
+                    System.out.println("Successfully added " + quantity + " " + selection.getLineName() + " tickets to " + fName + " " + lName + "'s account!\n\n");
+            }
+            else {
+                customer.addNewTicket(selection, quantity);
+                System.out.println("Successfully added " + quantity + " " + selection.getLineName() + " tickets to " + fName + " " + lName + "'s account!\n\n");
+            }
+        } catch (NullPointerException e) {
+            System.out.println("There was an error acquiring customer data.");
+        }
+    }
+    
+    public static void removeTickets(){
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Customer First Name: ");
+        String fName = sc.next();
+        System.out.print("Customer Last Name: ");
+        String lName = sc.next();
+        Customer customer = null;
+        for (Customer c : validCustomers) {
+            if (c.compareTo(new Customer(fName, lName)) == 0) {
+                customer = c;
+                break;
+            }
+        }
+        if (!validCustomers.contains(customer)) {
+            System.out.println("Customer not found");
+            return;
+        }
+        assert customer != null;
+        
+        if (customer.getTicketsHeld().isEmpty()) {
+            System.out.println(fName + lName + " has no tickets to remove");
+            return;
+        }
+        System.out.println(customer + "\n");
+        
+        System.out.println("Removable tickets: ");
+        int i = 0;
+        for (Pair<Tickets, Integer> t : customer.getTicketsHeld()) {
+            System.out.println(i+1 + ". " + t.getFirst().getLineName());
+        }
+        
+        Pair<Tickets, Integer> ticketType;
+        try {
+            System.out.print("Select a ticket type to remove: ");
+            ticketType = customer.getTicketsHeld().get(sc.nextInt()-1);
+        }
+        catch (Exception e) {
+            System.out.println("Invalid ticket type");
+            return;
+        }
+        System.out.print("Quantity: ");
+        int quantity;
+        
+        try {
+            quantity = sc.nextInt();
+        }
+        catch (Exception e) {
+            System.out.println("Invalid quantity");
+            return;
+        }
+        if (quantity < 0){
+            System.out.println("Cannot remove negative tickets");
+        }
+        else if (quantity > ticketType.getSecond()){
+            System.out.println(fName + lName + " has fewer tickets than this");
+        }
+        else if (quantity == ticketType.getSecond()) {
+            customer.removeTickets(ticketType);
+        }
+        else {
+            customer.alterTicketCount(ticketType, -(quantity));
+        }
+        sc.close();
     }
 }
