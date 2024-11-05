@@ -1,6 +1,9 @@
 import java.io.*;
 import java.util.LinkedList;
 
+/**
+ * Implements some methods to determine how customer information should be handled and displayed.
+ */
 public class Customer implements Comparable<Customer> {
     private final String fName, lName;
     private final SortedLinkedList<Pair<Tickets, Integer>> ticketsHeld;
@@ -61,6 +64,10 @@ public class Customer implements Comparable<Customer> {
         return false;
     }
     
+    /** This method returns a string output
+     * for the tickets to be reproduced when customer data is queried, the other getter methods wouldn't provide the
+     * correct formatting.
+     */
     public String printTicketsHeld(){
         StringBuilder sb = new StringBuilder();
         for (Pair<Tickets, Integer> pair : ticketsHeld) {
@@ -77,43 +84,51 @@ public class Customer implements Comparable<Customer> {
         
     }
     
+    /** This method is for calculating the total cost and total discount from each type of ticket in a customers account.
+     *  Discount type is calculated based on the quantities of tickets specified in the coursework instructions
+     *  A new letter is written to letters.txt for every non-eligible ticket in the customers account
+    */
     public String ticketTotal() {
         double total = 0.0;
-        double discountTotal = 0.0;
+        double discount = 0.0;
         for (Pair<Tickets, Integer> pair : ticketsHeld) {
-           double ticketPrice = pair.getSecond() * pair.getFirst().getTicketPrice();
-           if (pair.getSecond() >= 26) {
-               discountTotal += ticketPrice - (ticketPrice / Tickets.getD3());
-               ticketPrice = ticketPrice / Tickets.getD3(); //Applies 3rd discount
-           }
-           else if (pair.getSecond() >= 11) {
-               discountTotal += ticketPrice - (ticketPrice / Tickets.getD2());
-               ticketPrice = ticketPrice / Tickets.getD2(); //Applies 2nd discount
-           }
-           else if (pair.getSecond() >= 6) {
-               discountTotal += ticketPrice - (ticketPrice / Tickets.getD1());
-               ticketPrice = ticketPrice / Tickets.getD1();
-           }
-           else {
-               PrintWriter writer;
-               try {
-                   writer = new PrintWriter(new FileOutputStream("src/letters"));
-               } catch (FileNotFoundException e) {
-                   return "There was an error writing to letters.txt";
-               }
-               writer.print(letter(pair));
-               writer.close();
-           }
-           total += ticketPrice;
+            double tmp = pair.getSecond()*pair.getFirst().getTicketPrice();
+            double discountType = 0;
+            if (pair.getSecond() >= 26)
+                discountType = Tickets.getD3();
+            else if (pair.getSecond() >= 11)
+                discountType = Tickets.getD2();
+            else if (pair.getSecond() >= 6)
+                discountType = Tickets.getD1();
+            else {
+                PrintWriter writer;
+                try {
+                    writer = new PrintWriter(new FileOutputStream("src/letters", true));
+                } catch (FileNotFoundException e) {
+                    return "There was an error writing to letters.txt";
+                }
+                writer.print(letter(pair));
+                writer.flush();
+            }
+            total += tmp;
+            discount += tmp*discountType;
         }
-        return "Total cost: " + String.format("£%.2f", total) + "\nSavings: " + String.format("£%.2f\n", discountTotal);
+        if (discount != 0) { //Makes sure savings isn't displayed if there aren't any
+            return String.format("Cost: £%.2f\nSavings: £%.2f\n\n", total-discount, discount);
+        }
+        else {
+            return String.format("Cost: £%.2f\n\n", total);
+        }
     }
     
+    /** This method is just for formatting the letter output. It also calculates how many tickets are needed before any
+     * discount will apply.
+     */
     public String letter(Pair<Tickets, Integer> pair) {
         int reqTickets = 6 - pair.getSecond();
         return "Dear " + fName + " " + lName + ",\n\n" +
                 "You do not currently qualify for a discount on your " + pair.getFirst().getLineName() + " tickets.\n" +
                 "You need to purchase " + reqTickets + " more to qualify.\n\n" ;
     }
-    
+
 }

@@ -1,3 +1,7 @@
+/**
+ * This class is mostly boilerplate code for the ticket fields.
+ */
+
 public class Tickets implements Comparable<Tickets> {
     
     private String lineName;

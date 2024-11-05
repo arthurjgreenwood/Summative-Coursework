@@ -1,3 +1,8 @@
+/**
+ * This class just allows implementation of pairs. Code courtesy of Konrad's lecture slides bar the setSecond and
+ * compareTo
+ */
+
 public class Pair<T,S> implements Comparable<Pair<T,S>>
 {
     private T first;
