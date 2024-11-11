@@ -21,7 +21,6 @@ public class MainProgram {
      * Only works for the specific type of formatting given in the input file, but I assume that is okay for this
      * assignment.
      */
-    
     public static void readIn(){
         Scanner sc;
         try {
@@ -103,11 +102,11 @@ public class MainProgram {
     }
     
     public static void availableTickets(){
-        System.out.println();
-        System.out.println("Available tickets:");
+        System.out.println("\nAvailable tickets:");
         for (int i = 0; i < availableTickets.size(); i++) {
             System.out.println(i+1 + ". " + availableTickets.get(i));
         }
+        System.out.println();
     }
     
     /**
@@ -159,8 +158,7 @@ public class MainProgram {
             System.out.println("There was an error acquiring customer data.");
             return;
         }
-        
-        
+
         System.out.print("Quantity: ");
         int quantity = sc.nextInt();
         
@@ -169,11 +167,13 @@ public class MainProgram {
                 System.out.println("Cannot add negative tickets.");
             else if (customer.getTicketsHeld().contains(customer.getTicketHeld(selection))) {
                     customer.alterTicketCount(customer.getTicketHeld(selection), quantity);
-                    System.out.println("Successfully added " + quantity + " " + selection.getLineName() + " tickets to " + fName + " " + lName + "'s account!\n\n");
+                    System.out.println("\nSuccessfully added " + quantity + " " + selection.getLineName()
+                            + " tickets to " + fName + " " + lName + "'s account!\n");
             }
             else {
                 customer.addNewTicket(selection, quantity);
-                System.out.println("Successfully added " + quantity + " " + selection.getLineName() + " tickets to " + fName + " " + lName + "'s account!\n\n");
+                System.out.println("\nSuccessfully added " + quantity + " " + selection.getLineName() +
+                        " tickets to " + fName + " " + lName + "'s account!\n");
             }
         } catch (NullPointerException e) {
             System.out.println("There was an error acquiring customer data.");
@@ -196,12 +196,12 @@ public class MainProgram {
                 break;
             }
         }
-        if (!validCustomers.contains(customer)) {
+
+        if (!validCustomers.contains(customer) || (customer == null)){
             System.out.println("Customer not found");
             return;
         }
-        assert customer != null; //The validity of the customer is checked previously so we can make this assertation
-        
+
         if (customer.getTicketsHeld().isEmpty()) {
             System.out.println(fName + lName + " has no tickets to remove");
             return;
@@ -240,8 +240,8 @@ public class MainProgram {
             } else {
                 customer.alterTicketCount(ticketType, -(quantity));
             }
-            System.out.println("Successfully removed " + quantity + " " +
-                    ticketType.getFirst().getLineName() + " tickets from " + fName + " " + lName + "'s account!\n\n");
+            System.out.println("\nSuccessfully removed " + quantity + " " +
+                    ticketType.getFirst().getLineName() + " tickets from " + fName + " " + lName + "'s account!\n");
         } catch (Exception e) {
                 System.out.println("Invalid quantity");
         }

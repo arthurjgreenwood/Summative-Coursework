@@ -6,7 +6,7 @@ import java.util.LinkedList;
  */
 public class Customer implements Comparable<Customer> {
     private final String fName, lName;
-    private final SortedLinkedList<Pair<Tickets, Integer>> ticketsHeld;
+    private SortedLinkedList<Pair<Tickets, Integer>> ticketsHeld;
     
     public Customer(String fName, String lName) {
         this.fName = fName;
@@ -22,7 +22,7 @@ public class Customer implements Comparable<Customer> {
         return lName;
     }
     
-    public LinkedList<Pair<Tickets, Integer>> getTicketsHeld() {
+    public SortedLinkedList<Pair<Tickets, Integer>> getTicketsHeld() {
         return ticketsHeld;
     }
     
@@ -91,28 +91,31 @@ public class Customer implements Comparable<Customer> {
     public String ticketTotal() {
         double total = 0.0;
         double discount = 0.0;
+        double discountType= 0.0;
+        int numberOfTickets = 0;
         for (Pair<Tickets, Integer> pair : ticketsHeld) {
-            double tmp = pair.getSecond()*pair.getFirst().getTicketPrice();
-            double discountType = 0;
-            if (pair.getSecond() >= 26)
-                discountType = Tickets.getD3();
-            else if (pair.getSecond() >= 11)
-                discountType = Tickets.getD2();
-            else if (pair.getSecond() >= 6)
-                discountType = Tickets.getD1();
-            else {
-                PrintWriter writer;
-                try {
-                    writer = new PrintWriter(new FileOutputStream("src/letters", true));
-                } catch (FileNotFoundException e) {
-                    return "There was an error writing to letters.txt";
-                }
-                writer.print(letter(pair));
+            numberOfTickets += pair.getSecond();
+            total += pair.getFirst().getTicketPrice()*pair.getSecond(); // multiply ticket price by quantity
+        }
+        if (numberOfTickets >=26)
+            discountType = Tickets.getD3();
+        else if (numberOfTickets >=11)
+            discountType = Tickets.getD2();
+        else if (numberOfTickets >=6)
+            discountType = Tickets.getD1();
+        else {
+            PrintWriter writer;
+            try {
+                writer = new PrintWriter(new FileOutputStream("src/letters", true));
+               }
+            catch (FileNotFoundException e) {
+                return "There was an error writing to letters.txt";
+            }
+                writer.print(letter(numberOfTickets));
                 writer.flush();
             }
-            total += tmp;
-            discount += tmp*discountType;
-        }
+        discount += discountType * total;
+
         if (discount != 0) { //Makes sure savings isn't displayed if there aren't any
             return String.format("Cost: £%.2f\nSavings: £%.2f\n\n", total-discount, discount);
         }
@@ -124,11 +127,10 @@ public class Customer implements Comparable<Customer> {
     /** This method is just for formatting the letter output. It also calculates how many tickets are needed before any
      * discount will apply.
      */
-    public String letter(Pair<Tickets, Integer> pair) {
-        int reqTickets = 6 - pair.getSecond();
+    public String letter(int tickets) {
+        int reqTickets = 6 - tickets;
         return "Dear " + fName + " " + lName + ",\n\n" +
-                "You do not currently qualify for a discount on your " + pair.getFirst().getLineName() + " tickets.\n" +
+                "You do not currently qualify for a discount on your tickets.\n" +
                 "You need to purchase " + reqTickets + " more to qualify.\n\n" ;
     }
-
 }
