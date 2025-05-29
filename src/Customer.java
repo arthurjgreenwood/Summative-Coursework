@@ -1,5 +1,5 @@
 import java.io.*;
-import java.util.LinkedList;
+import java.util.LinkedList; //nich was here
 
 /**
  * Implements some methods to determine how customer information should be handled and displayed.
